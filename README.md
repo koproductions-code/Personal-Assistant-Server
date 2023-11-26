@@ -1,7 +1,7 @@
 # Personal Assistant Server
 
 ## Purpose
-### The purpose of this repository is to act as a server for the Personal-Assistant-Client repository.
+### The purpose of this repository is to act as a server for the [Personal-Assistant-Client]("https://github.com/koproductions-code/Personal-Assistant-Client") repository.
 
 ## Installation
 ```bash
