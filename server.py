@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from transformers import AutoModelForCausalLM , AutoTokenizer, AutoConfig
+from transformers import AutoModelForCausalLM , AutoTokenizer
 from fastapi import FastAPI, APIRouter
 import uvicorn
 import argparse
@@ -7,15 +7,22 @@ from pydantic import BaseModel
 
 class Request(BaseModel):
     system: str
-    functions: list
+    functions: str
     prompt: str
 
 
 class LLMServer:
 
     def __init__(self, args) -> None:
-        self.tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
-        self.model = AutoModelForCausalLM.from_pretrained(args.model, trust_remote_code=True).cuda()
+        if args.model == "Trelis/Llama-2-7b-chat-hf-function-calling-v2":
+            self.tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(args.model, trust_remote_code=True, load_in_8bit=True)
+        elif args.model == "glaiveai/glaive-function-calling-v2-small":
+            self.tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(args.model, trust_remote_code=True).half().cuda()
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
+            self.model = AutoModelForCausalLM.from_pretrained(args.model, trust_remote_code=True).cuda()
 
         self.model.config.pad_token_id = self.tokenizer.eos_token_id
 
@@ -39,7 +46,7 @@ class LLMServer:
         if request.system is not None:
             fullprompt += request.system
         
-        fullprompt += str(request.functions)
+        fullprompt += request.functions
         fullprompt += "\n" + request.prompt
 
         inputs = self.tokenizer(fullprompt,return_tensors="pt").to(self.model.device)
