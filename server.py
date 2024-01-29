@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from transformers import AutoModelForCausalLM , AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from fastapi import FastAPI, APIRouter
 import uvicorn
 import argparse
@@ -14,7 +14,7 @@ class Request(BaseModel):
 class LLMServer:
 
     def __init__(self, args) -> None:
-        if args.model == "Trelis/Llama-2-7b-chat-hf-function-calling-v2":
+        if args.model == "Trelis/Llama-2-7b-chat-hf-function-calling-v3":
             self.tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
             self.model = AutoModelForCausalLM.from_pretrained(args.model, trust_remote_code=True, load_in_8bit=True)
         elif args.model == "glaiveai/glaive-function-calling-v2-small":
@@ -25,6 +25,7 @@ class LLMServer:
             self.model = AutoModelForCausalLM.from_pretrained(args.model, trust_remote_code=True).cuda()
 
         self.model.config.pad_token_id = self.tokenizer.eos_token_id
+        self.max_tokens = args.tokens
 
         self.router = APIRouter()
         self.router.add_api_route("/request", self.request, methods=["POST"])
@@ -50,16 +51,18 @@ class LLMServer:
         fullprompt += "\n" + request.prompt
 
         inputs = self.tokenizer(fullprompt,return_tensors="pt").to(self.model.device)
-        outputs = self.model.generate(**inputs,do_sample=True,temperature=0.1,top_p=0.95,max_new_tokens=100)
+        outputs = self.model.generate(**inputs,do_sample=True,temperature=0.1,top_p=0.95,max_new_tokens=int(self.max_tokens))
         result = self.tokenizer.decode(outputs[0],skip_special_tokens=True)
         return {"response": result}
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='This is a fastapi server for hosting a llm with transformers on a gpu.')
+
     parser.add_argument("-u", "--url", help="Host url to bind the server to.", default="0.0.0.0")
     parser.add_argument("-p", "--port", help="Host port to bind the server to.", default=8000)
     parser.add_argument("-m", "--model", help="The model to load into the transformer. Check to make sure the model works with the transformers library and fits onto your gpu.", default="glaiveai/glaive-function-calling-v2-small")
+    parser.add_argument("-t", "--tokens", help="The max amount of tokens generated.", default=100)
 
     args = parser.parse_args()
     app = FastAPI()
