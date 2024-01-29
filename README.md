@@ -16,6 +16,8 @@ pip install -r requirements.txt
 python3 server.py
 ```
 
-## Attribution
+## Models
 
-**LLM Model:** https://huggingface.co/glaiveai/glaive-function-calling-v2-small
+**LLMs:** 
+- https://huggingface.co/glaiveai/glaive-function-calling-v2-small
+- https://huggingface.co/Trelis/Llama-2-7b-chat-hf-function-calling-v2
