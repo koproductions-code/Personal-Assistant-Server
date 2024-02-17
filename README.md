@@ -3,16 +3,10 @@
 ## Purpose
 ### The purpose of this repository is to act as a server for the [Personal-Assistant-Client]("https://github.com/koproductions-code/Personal-Assistant-Client") repository.
 
-## Installation
-```bash
-git clone https://github.com/koproductions-code/Personal-Assistant-Server
-cd Personal-Assistant-Server
-pip install -r requirements.txt
-```
-
 ## Usage
 ### Starting Server
 ```bash
+TODO: Add Output Of ./server.py --help Here
 python3 server.py
 ```
 
