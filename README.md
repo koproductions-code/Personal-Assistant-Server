@@ -6,7 +6,6 @@
 ## Usage
 ### Starting Server
 ```bash
-TODO: Add Output Of ./server.py --help Here
 python3 server.py
 ```
 
